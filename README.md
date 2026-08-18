@@ -7,7 +7,7 @@ Projeto desenvolvido como Trabalho de Conclusão de Curso (TCC) focado na aplica
 ## 🛠️ Tecnologias Utilizadas
 
 * **Linguagem Server-Side:** PHP 8.0+
-* **Banco de Dados:** MariaDB / MySQL (via XAMPP)
+* **Banco de Dados:** MySQL (via XAMPP)
 * **Front-end:** HTML5, CSS3, JavaScript puro (Drag and Drop nativo)
 * **Servidor Web Local:** Apache (XAMPP)
 
@@ -26,14 +26,3 @@ Projeto desenvolvido como Trabalho de Conclusão de Curso (TCC) focado na aplica
 * [ ] Sistema de Autenticação (Tela de Login/Cadastro com hash de senha).
 * [ ] Atribuição de tarefas para usuários cadastrados (`usuario_id`).
 * [ ] Controle de acesso por nível de permissão (`usuario` e `adm`).
-
----
-
-## 📁 Estrutura de Pastas
-
-```text
-├── database/            # Scripts SQL de criação do banco de dados
-│   └── schema.sql       # Estrutura das tabelas 'usuarios' e 'tarefas'
-├── src/                 # Código-fonte da aplicação (PHP, JS, CSS)
-├── .gitignore           # Arquivos omitidos no controle de versão
-└── README.md            # Documentação principal do repositório
