@@ -1,16 +1,14 @@
 <?php
-include 'db.php'; // Liga o arquivo à conexão do banco de dados
+include 'db.php'; // Liga o arquivo do banco de dados
 
 // Detecta se a requisição enviada pela tela foi via POST ou GET
 $metodo = $_SERVER['REQUEST_METHOD'];
 
 if ($metodo == 'POST') {
-    // Captura qual ação o usuário quer fazer
+    //qual ação o usuário quer fazer
     $acao = isset($_POST['acao']) ? $_POST['acao'] : '';
 
-    // ==========================================
-    // AÇÃO 1: CADASTRAR TAREFA (Via Formulário)
-    // ==========================================
+    // AÇÃO 1: CADASTRAR TAREFA
     if ($acao == 'cadastrar') {
         $titulo = mysqli_real_escape_string($conexao, $_POST['titulo']);
         $descricao = mysqli_real_escape_string($conexao, $_POST['descricao']);
@@ -20,26 +18,24 @@ if ($metodo == 'POST') {
         $sql = "INSERT INTO tarefas (titulo, descricao, status, usuario_id) VALUES ('$titulo', '$descricao', '$status', $usuario_id)";
         
         if (mysqli_query($conexao, $sql)) {
-            header("Location: index.php"); // Recarrega a página principal
+            header("Location: index.php"); // Recarrega index
             exit();
         } else {
             echo "Erro ao cadastrar tarefa: " . mysqli_error($conexao);
         }
     }
 
-    // =========================================================
-    // AÇÃO 2: ATUALIZAR STATUS (Via Drag and Drop do JavaScript)
-    // =========================================================
+    // AÇÃO 2: ATUALIZAR STATUS (Drag and Drop do JScript)
     elseif ($acao == 'atualizar_status') {
         $id = intval($_POST['id']);
         $status = mysqli_real_escape_string($conexao, $_POST['status']);
 
-        // Valida se o status arrastado é um dos permitidos no banco
+        // Valida o status arrastado é um dos permitidos no banco
         if (in_array($status, ['A Fazer', 'Em Andamento', 'Concluído'])) {
             $sql = "UPDATE tarefas SET status = '$status' WHERE id = $id";
             
             if (mysqli_query($conexao, $sql)) {
-                // Como essa ação é silenciosa (AJAX/Fetch), respondemos com um JSON de sucesso
+    
                 echo json_encode(["sucesso" => true]);
                 exit();
             } else {
@@ -57,23 +53,18 @@ elseif ($metodo == 'GET') {
         $acao = $_GET['acao'];
 
         switch ($acao) {
-            // ==========================================
+        
             // AÇÃO 3: ARQUIVAR TAREFA
-            // ==========================================
             case 'arquivar':
                 $sql = "UPDATE tarefas SET arquivada = 1 WHERE id = $id";
                 break;
-                
-            // ==========================================
+            
             // AÇÃO 4: DESARQUIVAR TAREFA
-            // ==========================================
             case 'desarquivar':
                 $sql = "UPDATE tarefas SET arquivada = 0 WHERE id = $id";
                 break;
-                
-            // ==========================================
-            // AÇÃO 5: EXCLUIR TAREFA (Ação destrutiva)
-            // ==========================================
+            
+            // AÇÃO 5: EXCLUIR TAREFA
             case 'excluir':
                 $sql = "DELETE FROM tarefas WHERE id = $id";
                 break;
