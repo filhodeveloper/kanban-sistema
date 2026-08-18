@@ -1,11 +1,11 @@
-<?php include 'db.php'; // Garante que a página está conectada ao banco [2] ?>
+<?php include 'db.php'; // Garante que a página está conectada ao banco ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Kanban Ágil</title>
-    <link rel="stylesheet" href="style.css"> <!-- Conecta com o visual do CSS [2] -->
+    <link rel="stylesheet" href="style.css"> <!-- Conecta com o visual do CSS -->
 </head>
 <body>
 
@@ -18,8 +18,11 @@
                 <span class="subtitle">Protótipo do TCC</span>
             </div>
             
-            <!-- Formulário de cadastro de nova tarefa [3, 4] -->
-            <form action="cadastrar_tarefa.php" method="POST" class="form-cadastro">
+            <!-- Formulário de cadastro de nova tarefa apontando para o arquivo unificado -->
+            <form action="acoes_tarefa.php" method="POST" class="form-cadastro">
+                <!-- Campo invisível que avisa ao PHP que a intenção é CADASTRAR -->
+                <input type="hidden" name="acao" value="cadastrar">
+                
                 <h3>Nova Atividade</h3>
                 
                 <div class="form-group">
@@ -32,7 +35,7 @@
                     <textarea id="descricao" name="descricao" rows="4" placeholder="Detalhes do que deve ser feito..."></textarea>
                 </div>
 
-                <!-- Campo de seleção de responsáveis [4] -->
+                <!-- Campo de seleção de responsáveis -->
                 <div class="form-group">
                     <label for="usuario_id">Responsável:</label>
                     <select id="usuario_id" name="usuario_id">
@@ -50,7 +53,7 @@
                 <button type="submit" class="btn-salvar">Cadastrar Tarefa</button>
             </form>
 
-            <!-- Seção de tarefas arquivadas (Chama acoes_tarefa.php com acao=desarquivar) [5, 6] -->
+            <!-- Seção de tarefas arquivadas -->
             <div class="arquivados-secao">
                 <h3>Tarefas Arquivadas</h3>
                 <ul class="lista-arquivados">
@@ -62,7 +65,7 @@
                     while($arq = mysqli_fetch_assoc($arqs)) {
                         echo "<li>";
                         echo "<span>" . htmlspecialchars($arq['titulo']) . "</span>";
-                        // LINK UNIFICADO: Desarquivar tarefa
+                        // Desarquivar tarefa aponta para o controlador unificado
                         echo "<a href='acoes_tarefa.php?id=" . $arq['id'] . "&acao=desarquivar' class='btn-desarquivar' title='Desarquivar tarefa'>↩️</a>";
                         echo "</li>";
                     }
@@ -71,7 +74,7 @@
             </div>
         </aside>
 
-        <!-- ÁREA PRINCIPAL DO QUADRO KANBAN [5, 7] -->
+        <!-- ÁREA PRINCIPAL DO QUADRO KANBAN -->
         <main class="quadro-container">
             <header class="quadro-header">
                 <h1>Painel de Controle Ágil</h1>
@@ -79,18 +82,16 @@
 
             <div class="quadro">
                 
-                <!-- COLUNA: A FAZER [7] -->
+                <!-- COLUNA: A FAZER -->
                 <div class="coluna coluna-fazer" ondragover="allowDrop(event)" ondrop="drop(event, 'A Fazer')">
                     <div class="coluna-titulo">
                         <h3>A Fazer</h3>
                     </div>
                     <div class="area-cartoes">
                         <?php
-                        // Busca apenas tarefas ativas (arquivada = 0) com status "A Fazer" [6]
                         $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'A Fazer' AND t.arquivada = 0 ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
                             echo "<div class='cartao card-fazer' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
-                            // LINK UNIFICADO: Excluir tarefa
                             echo "<a href='acoes_tarefa.php?id=" . $tarefa['id'] . "&acao=excluir' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")'>&times;</a>";
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
@@ -103,7 +104,7 @@
                     </div>
                 </div>
 
-                <!-- COLUNA: EM ANDAMENTO [7] -->
+                <!-- COLUNA: EM ANDAMENTO -->
                 <div class="coluna coluna-andamento" ondragover="allowDrop(event)" ondrop="drop(event, 'Em Andamento')">
                     <div class="coluna-titulo">
                         <h3>Em Andamento</h3>
@@ -113,7 +114,6 @@
                         $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'Em Andamento' AND t.arquivada = 0 ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
                             echo "<div class='cartao card-andamento' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
-                            // LINK UNIFICADO: Excluir tarefa
                             echo "<a href='acoes_tarefa.php?id=" . $tarefa['id'] . "&acao=excluir' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")'>&times;</a>";
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
@@ -126,7 +126,7 @@
                     </div>
                 </div>
 
-                <!-- COLUNA: CONCLUÍDO [7] -->
+                <!-- COLUNA: CONCLUÍDO -->
                 <div class="coluna coluna-concluido" ondragover="allowDrop(event)" ondrop="drop(event, 'Concluído')">
                     <div class="coluna-titulo">
                         <h3>Concluído</h3>
@@ -136,12 +136,8 @@
                         $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'Concluído' AND t.arquivada = 0 ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
                             echo "<div class='cartao card-concluido' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
-                            // LINK UNIFICADO: Excluir tarefa
                             echo "<a href='acoes_tarefa.php?id=" . $tarefa['id'] . "&acao=excluir' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")' title='Excluir tarefa'>&times;</a>";
-                            
-                            // LINK UNIFICADO: Arquivar tarefa (aparece apenas no Concluído)
                             echo "<a href='acoes_tarefa.php?id=" . $tarefa['id'] . "&acao=arquivar' class='btn-arquivar' title='Arquivar tarefa'>📥</a>";
-                            
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
                             if(!empty($tarefa['responsavel'])) {
@@ -157,7 +153,7 @@
         </main>
     </div>
 
-    <!-- CÓDIGO JAVASCRIPT DE MOVIMENTAÇÃO E DRAG & DROP [1, 2] -->
+    <!-- CÓDIGO JAVASCRIPT DE MOVIMENTAÇÃO E DRAG & DROP -->
     <script>
     function allowDrop(ev) {
         ev.preventDefault();
@@ -190,7 +186,6 @@
         } else if (novoStatus === 'Concluído') {
             cartaoElemento.classList.add('card-concluido');
             
-            // CORREÇÃO: Cria dinamicamente o botão de arquivar apontando para o arquivo unificado
             var tarefaId = cartaoElemento.getAttribute('data-id');
             var btnArquivar = document.createElement('a');
             btnArquivar.href = 'acoes_tarefa.php?id=' + tarefaId + '&acao=arquivar';
@@ -208,8 +203,11 @@
         var dadosFormulario = new FormData();
         dadosFormulario.append('id', id);
         dadosFormulario.append('status', status);
+        // NOVO: Avisa que a ação no controlador é para atualizar o status
+        dadosFormulario.append('acao', 'atualizar_status'); 
 
-        fetch('atualizar_status.php', {
+        // Agora aponta para acoes_tarefa.php
+        fetch('acoes_tarefa.php', {
             method: 'POST',
             body: dadosFormulario
         })
