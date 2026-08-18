@@ -188,3 +188,49 @@ body {
 .card-concluido {
     border-left: 5px solid #f59e0b;
 }
+
+/* Estilização para o botão de exclusão nos cartões */
+.cartao {
+    position: relative; /* Permite posicionar o botão 'x' no canto */
+}
+
+.btn-excluir {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.btn-excluir:hover {
+    color: #ef4444; /* Vermelho ao passar o mouse */
+}
+
+/* Estilo do campo Select de usuários */
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f9fafb;
+    color: #374151;
+    cursor: pointer;
+}
+
+/* Etiqueta visual do responsável no cartão */
+.badge-user {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+}

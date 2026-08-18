@@ -1,21 +1,22 @@
 <?php
-include 'db.php'; // Usa a conexão do arquivo anterior
+include 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Pega os textos que foram digitados no formulário
     $titulo = $_POST['titulo'];
     $descricao = $_POST['descricao'];
-    $status = 'A Fazer'; // Toda tarefa nova começa na primeira coluna
+    $status = 'A Fazer'; 
+    
+    // Captura o usuário selecionado no formulário
+    // Se nenhum usuário for escolhido, define como NULL no banco
+    $usuario_id = !empty($_POST['usuario_id']) ? intval($_POST['usuario_id']) : "NULL";
 
-    // Proteção básica para o banco de dados contra caracteres especiais
     $titulo = mysqli_real_escape_string($conexao, $titulo);
     $descricao = mysqli_real_escape_string($conexao, $descricao);
 
-    // Comando SQL para inserir a tarefa na tabela
-    $sql = "INSERT INTO tarefas (titulo, descricao, status) VALUES ('$titulo', '$descricao', '$status')";
+    // SQL atualizada para incluir a coluna do usuário responsável
+    $sql = "INSERT INTO tarefas (titulo, descricao, status, usuario_id) VALUES ('$titulo', '$descricao', '$status', $usuario_id)";
 
     if (mysqli_query($conexao, $sql)) {
-        // Se deu tudo certo, redireciona de volta para a tela principal
         header("Location: index.php");
         exit();
     } else {

@@ -1,4 +1,4 @@
-<?php include 'db.php'; // Conecta ao banco de dados ?>
+<?php include 'db.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,6 +30,21 @@
                     <label for="descricao">Descrição:</label>
                     <textarea id="descricao" name="descricao" rows="4" placeholder="Detalhes do que deve ser feito..."></textarea>
                 </div>
+
+                <!-- CAMPO DE ATRIBUIÇÃO DE USUÁRIO -->
+                <div class="form-group">
+                    <label for="usuario_id">Responsável:</label>
+                    <select id="usuario_id" name="usuario_id">
+                        <option value="">-- Sem responsável --</option>
+                        <?php
+                        // Busca todos os usuários cadastrados para listar no formulário
+                        $usuarios_query = mysqli_query($conexao, "SELECT id, nome FROM usuarios ORDER BY nome ASC");
+                        while($user = mysqli_fetch_assoc($usuarios_query)) {
+                            echo "<option value='".$user['id']."'>".htmlspecialchars($user['nome'])."</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
                 
                 <button type="submit" class="btn-salvar">Cadastrar Tarefa</button>
             </form>
@@ -44,21 +59,24 @@
             <div class="quadro">
                 
                 <!-- COLUNA: A FAZER -->
-                <!-- ondragover: Permite que elementos sejam arrastados por cima desta coluna -->
-                <!-- ondrop: Executa a função JavaScript ao soltar o cartão aqui dentro -->
                 <div class="coluna coluna-fazer" ondragover="allowDrop(event)" ondrop="drop(event, 'A Fazer')">
                     <div class="coluna-titulo">
                         <h3>A Fazer</h3>
                     </div>
                     <div class="area-cartoes">
                         <?php
-                        $busca = mysqli_query($conexao, "SELECT * FROM tarefas WHERE status = 'A Fazer' ORDER BY id DESC");
+                        // Faz uma busca (JOIN) unindo tarefas e usuários para pegar o nome do responsável
+                        $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'A Fazer' ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
-                            // draggable='true': Permite arrastar o cartão visualmente
-                            // ondragstart: Salva qual cartão está sendo arrastado no início do movimento
                             echo "<div class='cartao card-fazer' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
+                            // Botão de excluir tarefa
+                            echo "<a href='excluir_tarefa.php?id=" . $tarefa['id'] . "' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")'>&times;</a>";
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
+                            // Exibe o nome do responsável se houver algum associado
+                            if(!empty($tarefa['responsavel'])) {
+                                echo "<span class='badge-user'>👤 " . htmlspecialchars($tarefa['responsavel']) . "</span>";
+                            }
                             echo "</div>";
                         }
                         ?>
@@ -72,11 +90,15 @@
                     </div>
                     <div class="area-cartoes">
                         <?php
-                        $busca = mysqli_query($conexao, "SELECT * FROM tarefas WHERE status = 'Em Andamento' ORDER BY id DESC");
+                        $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'Em Andamento' ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
                             echo "<div class='cartao card-andamento' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
+                            echo "<a href='excluir_tarefa.php?id=" . $tarefa['id'] . "' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")'>&times;</a>";
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
+                            if(!empty($tarefa['responsavel'])) {
+                                echo "<span class='badge-user'>👤 " . htmlspecialchars($tarefa['responsavel']) . "</span>";
+                            }
                             echo "</div>";
                         }
                         ?>
@@ -90,11 +112,15 @@
                     </div>
                     <div class="area-cartoes">
                         <?php
-                        $busca = mysqli_query($conexao, "SELECT * FROM tarefas WHERE status = 'Concluído' ORDER BY id DESC");
+                        $busca = mysqli_query($conexao, "SELECT t.*, u.nome AS responsavel FROM tarefas t LEFT JOIN usuarios u ON t.usuario_id = u.id WHERE t.status = 'Concluído' ORDER BY t.id DESC");
                         while ($tarefa = mysqli_fetch_assoc($busca)) {
                             echo "<div class='cartao card-concluido' draggable='true' ondragstart='drag(event)' id='tarefa-" . $tarefa['id'] . "' data-id='" . $tarefa['id'] . "'>";
+                            echo "<a href='excluir_tarefa.php?id=" . $tarefa['id'] . "' class='btn-excluir' onclick='return confirm(\"Deseja realmente excluir esta tarefa?\")'>&times;</a>";
                             echo "<h4>" . htmlspecialchars($tarefa['titulo']) . "</h4>";
                             echo "<p>" . htmlspecialchars($tarefa['descricao']) . "</p>";
+                            if(!empty($tarefa['responsavel'])) {
+                                echo "<span class='badge-user'>👤 " . htmlspecialchars($tarefa['responsavel']) . "</span>";
+                            }
                             echo "</div>";
                         }
                         ?>
@@ -107,32 +133,23 @@
 
     <!-- CÓDIGO JAVASCRIPT DE MOVIMENTAÇÃO -->
     <script>
-    // 1. Permite que o navegador aceite soltar elementos nas colunas (por padrão o navegador bloqueia)
     function allowDrop(ev) {
         ev.preventDefault();
     }
 
-    // 2. Guarda temporariamente na memória qual é o ID do cartão que começou a ser arrastado
     function drag(ev) {
         ev.dataTransfer.setData("text", ev.target.id);
     }
 
-    // 3. Executa a ação de soltar o cartão dentro da coluna de destino
     function drop(ev, novoStatus) {
         ev.preventDefault();
-        
-        // Recupera o ID do cartão arrastado
         var data = ev.dataTransfer.getData("text");
         var cartaoElemento = document.getElementById(data);
-        
-        // Encontra a área de cartões interna da coluna onde o usuário soltou o mouse
         var areaCartoesDestino = ev.currentTarget.querySelector('.area-cartoes');
         
-        // Move visualmente o cartão para a nova coluna na tela
         areaCartoesDestino.appendChild(cartaoElemento);
         
-        // Remove a borda colorida antiga do CSS e coloca a nova cor correspondente ao novo status
-        cartaoElemento.className = 'cartao'; // Limpa classes antigas de estilo de cor
+        cartaoElemento.className = 'cartao';
         if (novoStatus === 'A Fazer') {
             cartaoElemento.classList.add('card-fazer');
         } else if (novoStatus === 'Em Andamento') {
@@ -141,31 +158,25 @@
             cartaoElemento.classList.add('card-concluido');
         }
 
-        // Pega o ID numérico da tarefa salvo no atributo 'data-id'
         var tarefaId = cartaoElemento.getAttribute('data-id');
-        
-        // Envia de forma silenciosa para o banco de dados atualizar o status
         enviarAtualizacaoBanco(tarefaId, novoStatus);
     }
 
-    // 4. Envia os dados para o back-end em PHP via Fetch API (AJAX moderno)
     function enviarAtualizacaoBanco(id, status) {
-        // Cria um formulário invisível na memória do navegador
         var dadosFormulario = new FormData();
         dadosFormulario.append('id', id);
         dadosFormulario.append('status', status);
 
-        // Dispara a requisição silenciosa ao arquivo PHP de atualização
         fetch('atualizar_status.php', {
             method: 'POST',
             body: dadosFormulario
         })
-        .then(response => response.json()) // Converte a resposta recebida para JSON
+        .then(response => response.json())
         .then(dados => {
             if (dados.sucesso) {
                 console.log("Banco de dados atualizado com sucesso!");
             } else {
-                alert("Erro ao salvar mudança no banco: " . dados.erro);
+                alert("Erro ao salvar mudança no banco: " + dados.erro);
             }
         })
         .catch(erro => {
