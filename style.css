@@ -234,3 +234,75 @@ body {
     font-weight: 500;
     border: 1px solid #e5e7eb;
 }
+/* Estilização da Seção de Arquivados */
+.arquivados-secao {
+    margin-top: auto; /* Joga a seção para o rodapé da sidebar */
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.arquivados-secao h3 {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.lista-arquivados {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.lista-arquivados li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.lista-arquivados li span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    color: #374151;
+}
+
+.lista-arquivados li .vazio {
+    color: #9ca3af;
+    text-align: center;
+    border: none;
+    background: none;
+}
+
+/* Botões de Ação de Arquivar/Desarquivar */
+.btn-arquivar {
+    position: absolute;
+    top: 10px;
+    right: 32px; /* Posicionado ao lado do botão excluir */
+    text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-arquivar:hover {
+    opacity: 0.7;
+}
+
+.btn-desarquivar {
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-desarquivar:hover {
+    transform: scale(1.2);
+}
