@@ -19,10 +19,9 @@ Projeto desenvolvido como Trabalho de Conclusão de Curso (TCC) focado na aplica
 * [x] Modelagem do banco de dados relacional (`usuarios` e `tarefas` com `FOREIGN KEY`).
 * [x] Visualização do quadro Kanban dividido em colunas (`A Fazer`, `Em Andamento`, `Concluído`).
 * [x] Movimentação interativa de cartões entre colunas via **Drag and Drop** (JavaScript).
-
+* [x] Funcionalidade de exclusão e edição de tarefas no quadro.
+      
 ### 🔄 Próximas Etapas (Em Desenvolvimento)
-* [ ] Persistência da atualização do status da tarefa via AJAX/PHP no MySQL.
-* [ ] Funcionalidade de exclusão e edição de tarefas no quadro.
 * [ ] Sistema de Autenticação (Tela de Login/Cadastro com hash de senha).
 * [ ] Atribuição de tarefas para usuários cadastrados (`usuario_id`).
 * [ ] Controle de acesso por nível de permissão (`usuario` e `adm`).
